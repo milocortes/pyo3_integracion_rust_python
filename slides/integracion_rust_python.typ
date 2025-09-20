@@ -12,6 +12,8 @@
 #set page(paper: "presentation-16-9")
 #set text(size: 20pt, font: "Lato")
 
+#show <a>: set text(blue)
+
 #show raw: it => {
   show regex("pin\d"): it => pin(eval(it.text.slice(3)))
   it
@@ -39,12 +41,43 @@
   == ¿Qué es PyO3?
 
   PyO3 es un proyecto desarrollado en Rust que permite la integración con Python. 
+
+  #text(font: "Lato", size : 18pt)[
+  #toolbox.side-by-side(gutter: 3mm, columns: (2fr, 2fr), 
+
+
+    [
+      #figure(
+      image("images/integracion_rust_python-pyo3_intro.png", width: 80%),
+      caption: [Tomado de Hewitt 2025],
+    ) 
+
+    - Guía para el desarrollador : #link("https://pyo3.rs")<a>
+    - Documentación : #link("https://docs.rs/pyo3")<a>
+    - Github : #link("https://github.com/pyo3/pyo3")<a>
+    ], 
+    [
+      == Proyectos de soporte
+      - *maturin* : CLI build backend.
+      - *setuptools-rust* : adiciona Rust a proyectos de setuptools.
+      - *rust-numpy* : numpy interoperability.  
+
+    ]
+
+  )
+  ]
+
 ]
 
 #slide[
   == La filosofía de PyO3 en el ecosistema de Python
 
   PyO3 agrega el poder y precisión de Rust al ecosistema de Python. No es una sustitución. Es complementario.
+
+      #figure(
+      image("images/integracion_rust_python-pyo3_vision.png", width: 40%),
+      caption: [Tomado de Hewitt 2025],
+    ) 
 ]
 
 #slide[
@@ -76,7 +109,6 @@
   fn my_rust_function(){...}
   ```
 
-  Tools like maturin and setuptools-rust handle the task of compiling the Rust code to a library placed where Python can consume it.
   ], 
   [
     #text(font: "Lato", size : 15pt)[
@@ -95,9 +127,88 @@
 
 ]
 
+
+#slide[
+  == Cómo funciona PyO3 
+
+  PyO3 user place procedural macro ("proc macro") attributes on their Rust code.
+
+  These generate Rust code calling Python's C API to define Python functions, classes and modules.
+
+  #toolbox.side-by-side(gutter: 3mm, columns: (2fr, 2fr), 
+
+  [
+  ```rust
+  #[pyfunction]
+  fn my_rust_function(){...}
+  ```
+
+  Tools like maturin and setuptools-rust handle the task of compiling the Rust code to a library placed where Python can consume it.
+  ], 
+  [
+    #text(font: "Lato", size : 15pt)[
+      ```rust
+      unsafe extern "C" fn __wrap(){...}
+
+      PyMethodDef{
+          ml_meth: __wrap as *mut c_void,
+          ...
+      }
+      ```
+  ]
+      #figure(
+      image("images/integracion_rust_python-pyo3_abi.png", width: 40%),
+    ) 
+  ]
+
+  )
+
+]
+
 #slide[
   == ¿Cómo consume Python las extensiones?
+  #toolbox.side-by-side(gutter: 3mm, columns: (2fr, 2fr), 
 
+  [
+  - Python's "import" statement is tipically used to load a Python file (module).
+  ], 
+  [
+    #text(font: "Lato", size : 25pt)[
+      ```python
+      import b
+      ```
+      #figure(
+      image("images/integracion_rust_python-python_rust_consumption_uno.png", width: 20%),
+    ) 
+  ]
+
+  ]
+
+  )
+]
+
+#slide[
+  == ¿Cómo consume Python las extensiones?
+  #toolbox.side-by-side(gutter: 3mm, columns: (2fr, 2fr), 
+
+  [
+  - Python's "import" statement is tipically used to load a Python file (module).
+  - It can load an "extension module" from a compiled library compatible with Python's ABI.
+  - This is used widely, e.g. Cython, C, C++, and Rust.
+  ], 
+  [
+    #text(font: "Lato", size : 25pt)[
+      ```python
+      import b
+      ```
+      #figure(
+      image("images/integracion_rust_python-python_rust_consumption_dos.png", width: 78%),
+    ) 
+  
+
+  ]
+  ]
+  )
 ]
 
 
@@ -169,7 +280,7 @@
   ) -> usize {
     let mut total = 0;
     for line in contents.lines(){
-        for word in line.split(){
+        for word in line.split(" "){
             if word == needle{
                 total += 1;
             }
@@ -221,7 +332,7 @@
   ) -> usize {
     let mut total = 0;
     for line in contents.lines(){
-        for word in line.split(){
+        for word in line.split(" "){
             if word == needle{
                 total += 1;
             }
