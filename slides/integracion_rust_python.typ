@@ -37,7 +37,7 @@
 
   Hermilo
 
-  July 23, 2023
+  4 de Septiembre 2025
 ]
 
 #slide[
@@ -55,14 +55,27 @@
   - #text(fill: red)[*Refactorizar*] es #text(fill: ukj-blue)[*"reescritura en una menor escala"*] #cite(<refactoringRust2025mara>). 
   - Es una técnica más controlada para mejorar el diseño y performance del software existente. 
   - En lugar de reemplazar al sistema actual por completo, nos gustaría detectar #text(fill: ukj-blue)[*las partes más criticas de nuestro código*] que necesitan ser refactorizadas.
-  - Al refactorizar se busca hacer cambios pequeños e independientes que puedan ser desplegados lo antes posible. 
-  - Se agregan métricas y monitoreo en torno a estos cambios para garantizar que cuando se implementen, los resultados se mantengan consistentes.
+  //- Al refactorizar se busca hacer cambios pequeños e independientes que puedan ser desplegados lo antes posible. 
+  //- Se agregan métricas y monitoreo en torno a estos cambios para garantizar que cuando se implementen, los resultados se mantengan consistentes.
 
 ]
 
+
+#[
+  #set page(margin: (top: 0.3cm, left: 1cm))
+#slide[
+  == ¿Qué es Refactorizar?
+        #figure(
+      image("images/remodelacion.png", width: 88%),
+    ) 
+]
+]
+
+
+
 #slide[
   == Python's bottleneck is inevitably performance (Hewitt, 2024)
-  - Muchas bibliotecas de Python tiene performance porque están parcial o totalmente implementadas en lenguajes de bajo nivel como C, C++, Fortran, Cython o bien con implementaciones alternativas de Python como PyPy, IronPython, Jython, CPython, etc #cite(<fastPython2023rodrigues>).
+  - Muchas bibliotecas de Python tiene performance porque están parcial o totalmente implementadas en lenguajes de bajo nivel como C, C++, Fortran, Cython o bien con implementaciones alternativas de Python como PyPy, IronPython, Jython, etc #cite(<fastPython2023rodrigues>).
   - #text(fill: ukj-blue)[*Si existen alternativas para mejorar el desempeño, ¿Por qué una alternativa adicional?*] #text(fill: red)[*¿Por qué Rust?*]
 ]
 
@@ -276,6 +289,39 @@
   )
 ]
 
+
+#[
+#set page(margin: (top: 0.4cm, left: 1cm))
+#slide[
+  == Cython Compiler
+
+  #toolbox.side-by-side(gutter: 3mm, columns: (1fr, 2fr),
+  [
+    - El compilador Cython convierte el código fuente de Cython a código de C optimizado.
+    - Posteriormente se compilará durante el proceso de construcción del paquete.
+  ], 
+
+  figure(
+      image("images/cpython_compilacion.png", width: 95%),
+      caption: [Tomado de #cite(<publishingPython2022hillard>)]
+  )
+  )
+]
+]
+
+#[
+#set page(margin: (top: 0.4cm, left: 1cm))
+#slide[
+  == Portabilidad
+  - Cuando escribimos paquetes usando solo Python, este es #text(fill: ukj-blue)[*extremadamente portable*]-cualquier sistema que tenga una versión compatible de Python puede ejecutar el paquete.
+  - Cuando incluimos código que debe ser compilado, #text(fill: ukj-blue)[*el código fuente tipicamente debe ser compilado separadamente para cada arquitectura y SO donde será usado*].
+
+  #figure(
+      image("images/anatomy_wheel.png", width: 68%),
+      caption: [Anatomía de un archivo de distribución wheel. Tomado de #cite(<publishingPython2022hillard>)]
+  )
+]
+]
 
 #slide[
   == Ejemplo
@@ -514,6 +560,27 @@
     hello_pyo3.count_ocurrences(contents, needle = "a")
     ```
 
+]
+
+#slide[
+  == ¿Qué hace el intérprete cuando llamamos a esta función?
+
+#text(font: "Lato", size : 18pt)[
+```python 
+import dis
+
+dis.dis('count_ocurrences("a b c d e", needle="a")')
+  0           0 RESUME                   0
+
+  1           2 PUSH_NULL
+              4 LOAD_NAME                0 (count_ocurrences)
+              6 LOAD_CONST               0 ('a b c d e')
+              8 LOAD_CONST               1 ('a')
+             10 KW_NAMES                 2 (('needle',))
+             12 CALL                     2
+             20 RETURN_VALUE
+    ```
+]
 ]
 
 #slide[
