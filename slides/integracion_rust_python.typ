@@ -9,6 +9,9 @@
 #codly(zebra-fill: none)
 
 // Make the paper dimensions fit for a presentation and the text larger
+#let ukj-blue = rgb(0, 84, 163)
+
+// Make the paper dimensions fit for a presentation and the text larger
 #set page(paper: "presentation-16-9")
 #set text(size: 20pt, font: "Lato")
 
@@ -35,6 +38,64 @@
   Hermilo
 
   July 23, 2023
+]
+
+#slide[
+  == Introducción
+  //== ¿Qué es Refactorizar?
+  - Nos gustaría mejorar el desempeño y diseño del software disponible.
+  - Tendencias tecnológicas y lenguajes de programación novedosos hace tentador a las empresas #text(fill: ukj-blue)[*reescribir*] sus productos.
+  -  Si algunas empresas han mostrado los beneficios en desempeño, seguridad y mantenibilidad de #text(fill: ukj-blue)[*reescribir*] su software en un lenguaje nuevo, ¿Por qué no hacer lo mismo? 
+  - #text(fill: red)[*Reescribir software desde cero es una tarea difícil y riesgosa*].
+  - #text(fill: ukj-blue)[*El software existente puede tener años de experiencia en producción y monitoreo, así como una base de conocimiento para identificar bugs.*]
+]
+
+#slide[
+  == ¿Qué es Refactorizar?
+  - #text(fill: red)[*Refactorizar*] es #text(fill: ukj-blue)[*"reescritura en una menor escala"*] #cite(<refactoringRust2025mara>). 
+  - Es una técnica más controlada para mejorar el diseño y performance del software existente. 
+  - En lugar de reemplazar al sistema actual por completo, nos gustaría detectar #text(fill: ukj-blue)[*las partes más criticas de nuestro código*] que necesitan ser refactorizadas.
+  - Al refactorizar se busca hacer cambios pequeños e independientes que puedan ser desplegados lo antes posible. 
+  - Se agregan métricas y monitoreo en torno a estos cambios para garantizar que cuando se implementen, los resultados se mantengan consistentes.
+
+]
+
+#slide[
+  == Python's bottleneck is inevitably performance (Hewitt, 2024)
+  - Muchas bibliotecas de Python tiene performance porque están parcial o totalmente implementadas en lenguajes de bajo nivel como C, C++, Fortran, Cython o bien con implementaciones alternativas de Python como PyPy, IronPython, Jython, CPython, etc #cite(<fastPython2023rodrigues>).
+  - #text(fill: ukj-blue)[*Si existen alternativas para mejorar el desempeño, ¿Por qué una alternativa adicional?*] #text(fill: red)[*¿Por qué Rust?*]
+]
+
+#slide[
+  == ¿Por qué Rust?
+
+  #text(font: "Lato", size : 17pt)[
+  - Rust es un lenguaje de programación que enfatiza tiempo de ejecución rápido, alta confiabilidad, memory safety y fearless concurrency.
+
+    - *Confiabilidad* : Control de errores. Patrón que combina ```rust Result<T, E>``` Type con Pattern Matching donde el desarrollador se encarga de manejar los errores como parte del desarrollo del programa. 
+    - *Memory Safety* : Sin la existencia de un recolector de basura. Concepto de  #text(fill: ukj-blue)[*borrow checker*] que verifica que los accesos a datos son legales, lo que le permite a Rust prevenir problemas de seguridad sin imponer costos durante el tiempo de ejecución #cite(<rustAction2023mcnamara>). Tres conceptos importantes : 
+      - *lifetimes*
+      - *ownership*
+      - *borrowing*
+    - *Concurrency* : Al escribir código multithreaded, la desarrolladora tendrá la confianza que no producirá #text(fill: ukj-blue)[*data races*].
+
+  ]
+]
+
+#[
+  #set page(margin: (top: 0.3cm, left: 1cm))
+#slide[
+  
+  == ¿Por qué Rust?
+
+  #text(font: "Lato", size : 30pt)[
+    #text(fill: ukj-blue)[*Rust offers power and precision to go beyond Python's limits (Hewitt, 2024)*]
+      #figure(
+      image("images/hewitt.jpeg", width: 65%),
+    ) 
+  ]
+
+]
 ]
 
 #slide[
@@ -82,10 +143,10 @@
 
 #slide[
   == Cómo funciona PyO3 
+  PyO3 usa macros procedurales ("proc macro") las cuales son una forma de metaprogramación#footnote[*Metaprogramación* es código que usará otro código como insumo] que permite manipular, generar código adicional, o agregar nuevas capacidades a nuestro programa#footnote[En Rust existen dos tipos de macros : *declarativas* y *procedurales*].
 
-  PyO3 user place procedural macro ("proc macro") attributes on their Rust code.
 
-  These generate Rust code calling Python's C API to define Python functions, classes and modules.
+  La macro expande el código de Rust para llamar la API de C de Python para definir funciones, clases y módulos.
 
   ```rust
   #[pyfunction]
@@ -97,9 +158,10 @@
 #slide[
   == Cómo funciona PyO3 
 
-  PyO3 user place procedural macro ("proc macro") attributes on their Rust code.
+  PyO3 usa macros procedurales ("proc macro") las cuales son una forma de metaprogramación#footnote[*Metaprogramación* es código que usará otro código como insumo] que permite manipular, generar código adicional, o agregar nuevas capacidades a nuestro programa#footnote[En Rust existen dos tipos de macros : *declarativas* y *procedurales*].
 
-  These generate Rust code calling Python's C API to define Python functions, classes and modules.
+
+  La macro expande el código de Rust para llamar la API de C de Python para definir funciones, clases y módulos.
 
   #toolbox.side-by-side(gutter: 3mm, columns: (2fr, 2fr), 
 
@@ -114,7 +176,6 @@
     #text(font: "Lato", size : 15pt)[
       ```rust
       unsafe extern "C" fn __wrap(){...}
-
       PyMethodDef{
           ml_meth: __wrap as *mut c_void,
           ...
@@ -130,10 +191,12 @@
 
 #slide[
   == Cómo funciona PyO3 
+  #text(font: "Lato", size : 17pt)[
+  PyO3 usa macros procedurales ("proc macro") las cuales son una forma de metaprogramación que permite manipular, generar código adicional, o agregar nuevas capacidades a nuestro programa.
 
-  PyO3 user place procedural macro ("proc macro") attributes on their Rust code.
 
-  These generate Rust code calling Python's C API to define Python functions, classes and modules.
+  La macro expande el código de Rust para llamar la API de C de Python para definir funciones, clases y módulos.
+  ]
 
   #toolbox.side-by-side(gutter: 3mm, columns: (2fr, 2fr), 
 
@@ -142,14 +205,16 @@
   #[pyfunction]
   fn my_rust_function(){...}
   ```
+  #text(font: "Lato", size : 17pt)[
 
-  Tools like maturin and setuptools-rust handle the task of compiling the Rust code to a library placed where Python can consume it.
+  Herramientas como maturin y setuptools-rust se encargan de la tarea de compilar el código de Rust a un módulo para que Python pueda consumirlo.
+
+  ]
   ], 
   [
-    #text(font: "Lato", size : 15pt)[
+    #text(font: "Lato", size : 14pt)[
       ```rust
       unsafe extern "C" fn __wrap(){...}
-
       PyMethodDef{
           ml_meth: __wrap as *mut c_void,
           ...
@@ -170,7 +235,7 @@
   #toolbox.side-by-side(gutter: 3mm, columns: (2fr, 2fr), 
 
   [
-  - Python's "import" statement is tipically used to load a Python file (module).
+  - Comunmente la declaración ```import``` de Python se usa para cargar un archivo (módulo) de Python.
   ], 
   [
     #text(font: "Lato", size : 25pt)[
@@ -192,9 +257,9 @@
   #toolbox.side-by-side(gutter: 3mm, columns: (2fr, 2fr), 
 
   [
-  - Python's "import" statement is tipically used to load a Python file (module).
-  - It can load an "extension module" from a compiled library compatible with Python's ABI.
-  - This is used widely, e.g. Cython, C, C++, and Rust.
+  - Comunmente la declaración ```import``` de Python se usa para cargar un archivo (módulo) de Python.
+  - También puede carga un *extension module* de una biblioteca compatible con el ABI#footnote[*Application Biding Interface*] de Python.
+  - Esto es apliamente usado, e.g. Cython, C, C++, y Rust.
   ], 
   [
     #text(font: "Lato", size : 25pt)[
@@ -202,7 +267,7 @@
       import b
       ```
       #figure(
-      image("images/integracion_rust_python-python_rust_consumption_dos.png", width: 78%),
+      image("images/integracion_rust_python-python_rust_consumption_dos.png", width: 66%),
     ) 
   
 
@@ -248,7 +313,7 @@
 
 #slide[
   == Ejemplo
-  PyO3 translation of this function is very mechanical :
+  La traducción de esta función con PyO3 es mecánica:
 
   #text(font: "Lato", size : 14pt)[
   #toolbox.side-by-side(gutter: 3mm, columns: (2fr, 2fr), 
@@ -298,7 +363,7 @@
 
 #slide[
   == Ejemplo
-  PyO3 translation of this function is very mechanical:
+  La traducción de esta función con PyO3 es mecánica:
 
 
   #text(font: "Lato", size : 14pt)[
@@ -439,7 +504,7 @@
 ]
 
 #slide[
-  == What does the interpreter do when we call this function?
+  == ¿Qué hace el intérprete cuando llamamos a esta función?
 
     ```python 
     import hello_pyo3
@@ -449,4 +514,8 @@
     hello_pyo3.count_ocurrences(contents, needle = "a")
     ```
 
+]
+
+#slide[
+  #bibliography("references.bib",  style: "apa")
 ]
