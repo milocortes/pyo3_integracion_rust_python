@@ -271,7 +271,7 @@
 
   [
   - Comunmente la declaración ```import``` de Python se usa para cargar un archivo (módulo) de Python.
-  - También puede carga un *extension module* de una biblioteca compatible con el ABI#footnote[*Application Biding Interface*] de Python.
+  - También puede carga un *extension module* de una biblioteca compatible con el ABI#footnote[*Application Binary Interface*] de Python.
   - Esto es apliamente usado, e.g. Cython, C, C++, y Rust.
   ], 
   [
